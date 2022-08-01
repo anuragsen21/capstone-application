@@ -10,7 +10,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-
 import com.capstone.entity.Director;
 import com.capstone.entity.Movie;
 import com.capstone.service.MovieService;
@@ -31,17 +30,52 @@ public class CapstoneApplication implements CommandLineRunner {
 	
 	@Override
 	public void run(String... args) throws Exception {
-		Scanner scan 	= new Scanner(System.in);
 		
 		////////Insert Director & Movies
+		insertDirectorAndMovie();
+		
+		////////Display all the movies 
+		displayAllMovies();
+		
+		////////List movies based on the movie title
+		////////Display movies based on the title, if not present, then display exception with the message "Invalid Movie title".
+		displayMoviesBasedOnTitle();
+		
+		////////Display movies based on the title like, if not present, then display exception with the message "Invalid Movie title".
+		displayMoviesBasedOnTitleLike();
+      
+		////////List movies based on director name
+		////////Display movie based on the director's first and last name, if the director's name is 
+		////////not present, then display exception with the message "Invalid Director name".
+		displayDirectorDetails();
+		
+		////////List director's details based on the movie title
+		////////Display director's details based on the movie title, if not present, then display exception with message "Invalid Movie title"
+		displayDirectorByMovieTitle();
+		
+		////////Update director details based on director first and last name
+		////////Provide the director's first name and last name to update his new address, contact number and 
+		////////display appropriate error messages for the invalid details.
+		updateDirectorDetails();
+
+		////////- Update new release date based on the movie title
+		////////Update the new release date for the existing movie and display appropriate error messages for invalid details.		
+		updateMovieDetails();
+
+		////////Remove movie based on movie title
+		deleteMovieByName();
+  
+	}
+	
+	public void insertDirectorAndMovie() {
 		Movie eMovie = new Movie(8, "Bhahubali 2", LocalDate.now(), LocalDateTime.now());
 		Director eDirector = new Director(3, "SS", "Rajamouli", "Dir Address Three", 1111111113, "rajamouli@mail.com");
 		eMovie.getDirector().add(eDirector);
 		eDirector.getMovie().add(eMovie);
 		movieService.insertMovieAndDirector(eMovie);
-		
-		
-		////////Display all the movies 
+	}
+	
+	public void displayAllMovies() {
 		List<Movie> list = movieService.getAllMovies();
 		if(list.size() > 0) {
 			System.out.println("Movie Names : ");
@@ -51,16 +85,19 @@ public class CapstoneApplication implements CommandLineRunner {
 		}else {
 			System.out.println("No Movie Found !!!");
 		}
-		
-		////////List movies based on the movie title
-		////////Display movies based on the title, if not present, then display exception with the message "Invalid Movie title".
+	}
+	
+	public void displayMoviesBasedOnTitle() throws Exception {
+		Scanner scan 		= new Scanner(System.in);
 		System.out.println("Name of Movie : ");
-		String movieName = scan.nextLine();
-		Movie srchMov = movieService.getMovieByName(movieName);
+		String movieName 	= scan.nextLine();
+		Movie srchMov		= movieService.getMovieByName(movieName);
 		System.out.println(srchMov.getMovieTitle());
-		
-		
-		////////Display movies based on the title like, if not present, then display exception with the message "Invalid Movie title".
+		scan.close();
+	}
+	
+	public void displayMoviesBasedOnTitleLike() {
+		Scanner scan 		= new Scanner(System.in);
 		System.out.println("Name of Movie Like : ");
 		String inMovieName = scan.nextLine();
 		List<Movie> srchMovie = movieService.getMovieByNamesLike("%" + inMovieName + "%");
@@ -72,16 +109,22 @@ public class CapstoneApplication implements CommandLineRunner {
 		}else {
 			System.out.println("No Movie Found !!!");
 		}
-      
-		
-		////////List movies based on director name
-		////////Display movie based on the director's first and last name, if the director's name is 
-		////////not present, then display exception with the message "Invalid Director name".
+		scan.close();
+	}
+	
+	public void displayDirectorDetails() throws Exception {
+		Scanner scan 		= new Scanner(System.in);
 		System.out.println("Name of Director First Name : ");
 		String dirFirstName = scan.nextLine();
 		System.out.println("Name of Director Last Name : ");
 		String dirLastName = scan.nextLine();
-		List<Movie> lstSrchMov = movieService.getMovieByDirectorName(dirFirstName, dirLastName);
+		List<Movie> lstSrchMov = null;
+		try {
+			lstSrchMov = movieService.getMovieByDirectorName(dirFirstName, dirLastName);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		if(lstSrchMov.size() > 0) {
 			System.out.println("Movie Names : ");
 			for (Movie movie : lstSrchMov) {
@@ -91,21 +134,20 @@ public class CapstoneApplication implements CommandLineRunner {
 			scan.close();
 			throw new Exception("Invalid Director Name : " + dirFirstName + " " + dirLastName);
 		}
-		
-		
-
-		////////List director's details based on the movie title
-		////////Display director's details based on the movie title, if not present, then display exception with message "Invalid Movie title"
+		scan.close();
+	}
+	
+	public void displayDirectorByMovieTitle() throws Exception {
+		Scanner scan 		= new Scanner(System.in);
 		System.out.println("Name of Movie : ");
 		String movName 		= scan.nextLine();		
 		Director dirDetails = directorService.getDirectorDetailsByMovieByName(movName);
 		System.out.println("Director Name : " + dirDetails.getFirstName() + " " + dirDetails.getLastName());
-		
-		
-		
-		////////Update director details based on director first and last name
-		////////Provide the director's first name and last name to update his new address, contact number and 
-		////////display appropriate error messages for the invalid details.
+		scan.close();
+	}
+	
+	public void updateDirectorDetails() throws Exception {
+		Scanner scan 		= new Scanner(System.in);
 		System.out.println("Name of Director First Name : ");
 		String dirInFirstName = scan.nextLine();
 		System.out.println("Name of Director Last Name : ");
@@ -128,11 +170,11 @@ public class CapstoneApplication implements CommandLineRunner {
 		Integer newContact = scan.nextInt();
 		directorService.updateDirectorDetails(dirDet.getDirectorId(), newFName, newLName, newAddress, newContact, newEmail);
 		System.out.println("Director's Details Updated Successfully !!!");
-		
-		
-
-		////////- Update new release date based on the movie title
-		////////Update the new release date for the existing movie and display appropriate error messages for invalid details.		
+		scan.close();
+	}
+	
+	public void updateMovieDetails() throws Exception {
+		Scanner scan 		= new Scanner(System.in);
 		System.out.println("Name of Movie : ");
 		String inMovName 		= scan.nextLine();
 		Movie listSrchMov 		= movieService.getMovieByName(inMovName);
@@ -141,20 +183,18 @@ public class CapstoneApplication implements CommandLineRunner {
 		System.out.println("New Release Date (yyyy-mm-dd) : ");
 		String newDate 			= scan.nextLine();
         LocalDate releaseDate 	= LocalDate.parse(newDate);
-		movieService.updateMovieReleaseDate(srchMov.getMovieId(), releaseDate);
+		movieService.updateMovieReleaseDate(listSrchMov.getMovieId(), releaseDate);
 		System.out.println("Movie Release Date Updated Successfully !!!");
-
-
-		
+		scan.close();
+	}
 	
-		////////Remove movie based on movie title
+	public void deleteMovieByName() throws Exception {
+		Scanner scan 		= new Scanner(System.in);
 		System.out.println("Name of Movie To Delete : ");
 		String inMovieNam	= scan.nextLine();
 		Movie remMovie		= movieService.getMovieByName(inMovieNam);
 		movieService.removeMovie(remMovie.getMovieId());
 		System.out.println("Movie Deleted Successfully !!!");
-		
-        scan.close();
-        
+		scan.close();
 	}
 }
